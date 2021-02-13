@@ -29,19 +29,21 @@ func New(w io.Writer) *Alog {
 		w = os.Stdout
 	}
 	return &Alog{
-		dest: w,
-		m: new(sync.Mutex),
-		msgCh: make(chan string),
-		errorCh: make(chan error),
+		dest:               w,
+		m:                  new(sync.Mutex),
+		msgCh:              make(chan string),
+		errorCh:            make(chan error),
+		shutdownCh:         make(chan struct{}),
+		shutdownCompleteCh: make(chan struct{}),
 	}
 }
 
 // Start begins the message loop for the asynchronous logger. It should be initiated as a goroutine to prevent
 // the caller from being blocked.
 func (al Alog) Start() {
- 	for {
-		msg := <- al.msgCh
-	 	go al.write(msg, nil)
+	for {
+		msg := <-al.msgCh
+		go al.write(msg, nil)
 	}
 }
 
